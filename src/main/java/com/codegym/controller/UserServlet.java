@@ -1,5 +1,6 @@
 package com.codegym.controller;
 
+import com.codegym.dao.IUserDAO;
 import com.codegym.dao.UserDAO;
 import com.codegym.model.User;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 @WebServlet(name = "UserServlet", urlPatterns = "/users")
 public class UserServlet extends HttpServlet {
-    private UserDAO userDAO;
+    private IUserDAO userDAO;
 
     public void init() {
         userDAO = new UserDAO();
@@ -63,6 +64,14 @@ public class UserServlet extends HttpServlet {
                 case "delete":
                     showDeleteForm(request, response);
                     break;
+                // === CÁC CASE BỔ SUNG Ở BƯỚC 2 ===
+                case "search":
+                    searchUserByCountry(request, response);
+                    break;
+                case "sort":
+                    sortUserByName(request, response);
+                    break;
+                // =================================
                 default:
                     listUser(request, response);
                     break;
@@ -103,6 +112,25 @@ public class UserServlet extends HttpServlet {
         request.setAttribute("user", user);
         dispatcher.forward(request, response);
     }
+
+    // === CÁC PHƯƠNG THỨC XỬ LÝ SEARCH VÀ SORT BỔ SUNG Ở BƯỚC 2 ===
+    private void searchUserByCountry(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        String country = request.getParameter("country");
+        List<User> listUser = userDAO.selectUsersByCountry(country);
+        request.setAttribute("listUser", listUser);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("user/list.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    private void sortUserByName(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, ServletException, IOException {
+        List<User> listUser = userDAO.sortUsersByName();
+        request.setAttribute("listUser", listUser);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("user/list.jsp");
+        dispatcher.forward(request, response);
+    }
+    // ============================================================
 
     private void insertUser(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
